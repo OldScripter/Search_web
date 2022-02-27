@@ -1,6 +1,6 @@
 #include "../include/httptools.h"
 
-std::string getHTML(std::string url, std::string status_code)
+std::string HttpTools::getHTML(std::string url, std::string status_code)
 {
     if (url.find("https://") != std::string::npos)
     {
@@ -21,7 +21,7 @@ std::string getHTML(std::string url, std::string status_code)
     }
 }
 
-std::string cleantext(GumboNode* node) 
+std::string HttpTools::cleantext(GumboNode* node) 
 {
     if (node->type == GUMBO_NODE_TEXT) 
     {

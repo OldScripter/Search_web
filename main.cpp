@@ -29,10 +29,18 @@ int main()
     {
         if (s == ' ')
         {
-            words.push_back(word);
+            if (word != "")
+            {
+                words.push_back(word);
+            }
             word = "";
         }
-        else
+        else if (   (s >= '0' && s <= '9') || 
+                    (s >= 'A' && s <= 'Z') ||
+                    (s >= 'a' && s <= 'z') ||
+                    (s >= 'А' && s <= 'Я') ||
+                    (s >= 'а' && s <= 'я')
+                )
         {
             // use normalize words here:
             // ...
