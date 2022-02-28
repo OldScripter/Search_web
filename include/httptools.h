@@ -9,9 +9,10 @@ class HttpTools
 {
     private:
 
-    std::string lastResponseStatusCode {"n/a"};
+        long int lastResponseStatusCode {0};
 
     public:
+
 
     /**
      * @brief  Get the HTML code from URL
@@ -19,7 +20,14 @@ class HttpTools
      * @param[out] status_code string for response status code writing
      * @return html code in string format
      **/
-    std::string getHTML(std::string url, std::string status_code);
+    std::string getHTML(std::string url, long status_code);
+    
+    /**
+     * @brief  Get the HTML code from URL
+     * @param[in] url url for request
+     * @return html code in string format
+     **/
+    std::string getHTML(std::string url);
 
     /**
      * @brief Cleaning html response text from tags
@@ -31,13 +39,12 @@ class HttpTools
 
     /**
      * @brief Get the Last Response Status Code in string format
-     * @return std::string status code or \"n/a\" if there were 
+     * @return long status code or \"n/a\" if there were 
      * now responses
      */
-    std::string getLastResponseStatusCode() const
+    long getLastResponseStatusCode() const
     {
         return lastResponseStatusCode;
     }
 
 };
-

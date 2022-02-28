@@ -1,6 +1,6 @@
 #include "../include/httptools.h"
 
-std::string HttpTools::getHTML(std::string url, std::string status_code)
+std::string HttpTools::getHTML(std::string url, long status_code)
 {
     if (url.find("https://") != std::string::npos)
     {
@@ -9,6 +9,29 @@ std::string HttpTools::getHTML(std::string url, std::string status_code)
     }
     cpr::Response response = cpr::Get(cpr::Url(url));
     status_code = response.status_code;
+    this->lastResponseStatusCode = response.status_code;
+
+    if (response.status_code == 200)
+    {
+        return response.text;
+    }
+    else
+    {
+        std::cerr << "Error " << response.status_code << " is ocured.\n";
+        return "";
+    }
+}
+
+std::string HttpTools::getHTML(std::string url)
+{
+    if (url.find("https://") != std::string::npos)
+    {
+        auto httpsPosition = url.find("https://");
+        url.erase(httpsPosition + 4, 1);
+    }
+    cpr::Response response = cpr::Get(cpr::Url(url));
+
+    this->lastResponseStatusCode = response.status_code;
 
     if (response.status_code == 200)
     {

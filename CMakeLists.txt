@@ -14,10 +14,16 @@ include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git GIT_TAG beb9e98806bb84bcc130a2cebfbcbbc6ce62b335) # The commit hash for 1.7.2. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
 
+file(GLOB snowball_src
+     "snowball/src_c/*.c"
+     "snowball/src_c/*.cpp"
+)
+
 
 add_executable(${PROJECT_NAME} 
         main.cpp
         src/httptools.cpp
+
         gumbo-parser/src/attribute.c
         gumbo-parser/src/char_ref.c
         gumbo-parser/src/error.c
@@ -30,7 +36,16 @@ add_executable(${PROJECT_NAME}
         gumbo-parser/src/util.c
         gumbo-parser/src/vector.c
 
+        ${snowball_src}
 
+        snowball/libstemmer/libstemmer.c
+        #snowball/libstemmer/libstemmer_utf8.c
+
+
+        snowball/runtime/api.c
+        snowball/runtime/utilities.c
+
+  
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
 
