@@ -23,6 +23,7 @@ file(GLOB snowball_src
 add_executable(${PROJECT_NAME} 
         main.cpp
         src/httptools.cpp
+        src/configuration.cpp
 
         gumbo-parser/src/attribute.c
         gumbo-parser/src/char_ref.c

@@ -1,81 +1,62 @@
 #include <iostream>
-#include "include/httptools.h"
 #include <vector>
-#include "snowball/include/libstemmer.h"
+#include <thread>
+#include <mutex>
+
+#include "include/httptools.h"
+#include "include/configuraton.h"
+
+std::mutex access_mutex;
+
+void processUrl(std::string url)
+{
+    HttpTools* httpTools = new HttpTools();
+    //std::string requestStatusCode {""};
+    std::string html = httpTools->getHTML(url);
+    std::cout   << "response status code -\t" 
+                << httpTools->getLastResponseStatusCode() << "\n";
+    //std::cout << html << "\n";
+    std::string cleanedHtml = httpTools->getCleanedText(html);
+    //split in words:
+    std::vector<std::string> words = httpTools->getNormalisedWordsEng(cleanedHtml);
+    //printing vector:
+    //httpTools->printVector(words);
+    //After insertion to SQL:
+    //ToDo: place to SQL;
+    words.clear();
+}
+
 
 int main()
 {
-    HttpTools* httpTools = new HttpTools();
+    
     std::cout << "Search engine 1.0.1 by oldscripter\n";
 
-    //std::string requestStatusCode {""};
-    std::string html = httpTools->getHTML("https://httpbin.org/html");
+    std::vector<std::thread> urlProcessingThreads;
 
-    std::cout   << "response status code -\t" 
-                << httpTools->getLastResponseStatusCode() << "\n";
-
-    std::cout << html << "\n";
-
-    std::cout << "HTML after parsing:\n";
-    std::string cleanedHtml{""};
-    GumboOutput* output = gumbo_parse(html.c_str());
-    cleanedHtml += httpTools->cleantext(output->root) + " "; //may be split heml into words right here?
-    //Need to delete all symbols except letters.
-    gumbo_destroy_output(&kGumboDefaultOptions, output);
-
-
-    //split in words:
+    //Read configuration:
+    Configuration::getInstance();
     
-    std::vector<std::string> words;
-    std::string word{""};
-    for (auto s : cleanedHtml)
+    //Start new thread"
+    std::string url {""};
+    std::forward_list<std::string> urls = *Configuration::getInstance()->getStartUrlSet();
+    for (auto url : urls)
     {
-        if (s == ' ')
-        {
-            if (word != "")
-            {
-                words.push_back(word);
-            }
-            word = "";
-        }
-        else if (   (s >= '0' && s <= '9') || 
-                    (s >= 'A' && s <= 'Z') ||
-                    (s >= 'a' && s <= 'z') ||
-                    (s >= 'А' && s <= 'Я') ||
-                    (s >= 'а' && s <= 'я')
-                )
-        {
-            // use normalize words here:
-            // ...
-            word += s;
-        }
+        std::thread urlProcessing (processUrl, url);
+        std::cout << urlProcessing.get_id() << ": thread is started.\n";
+        access_mutex.lock();
+        urlProcessingThreads.push_back(std::move(urlProcessing));
+        std::cout << urlProcessing.get_id() << ": thread is pushed to threads list.\n";
+        access_mutex.unlock();
     }
 
-    //printing vector:
-    for (auto word : words)
+    access_mutex.lock();
+    for (std::thread& t : urlProcessingThreads)
     {
-        std::cout << word << "\n";
+        std::cout << t.get_id() << ": is finishing\n";
+        if (t.joinable()) t.join();
     }
-
-    // stem (snowball):
-    struct sb_stemmer* stemmer;
-    stemmer = sb_stemmer_new("english", "UTF_8");
-    std::string test = "going";
-    sb_symbol* s = (sb_symbol*) malloc (test.length() * sizeof(sb_symbol));
-    int i = 0;
-    for (auto c: test)
-    {
-        c = tolower(c);
-        s[i] = c;
-        ++i;
-    }
-
-    const sb_symbol * stemmed = sb_stemmer_stem(stemmer, s, i);
-
-    std::cout << stemmed << "\n";
-
-
-    
+    access_mutex.unlock();
 
     return 0;
 } 
